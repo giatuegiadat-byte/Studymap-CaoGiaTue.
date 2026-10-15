@@ -1,6 +1,8 @@
 window.studyMapFirebaseConfig = {
-  apiKey: "DAN_API_KEY_FIREBASE",
-  authDomain: "TEN_PROJECT.firebaseapp.com",
-  projectId: "TEN_PROJECT",
-  appId: "DAN_APP_ID_FIREBASE"
+  apiKey: "AIzaSyDTpPp2rMnUGTYvLZc2RiIVChH7m2TdFE",
+  authDomain: "studymap-85873.firebaseapp.com",
+  projectId: "studymap-85873",
+  storageBucket: "studymap-85873.firebasestorage.app",
+  messagingSenderId: "1071508622647",
+  appId: "1:1071508622647:web:335867c2973a5588939eb2"
 };
