@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StudyMap</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== TRANG CHỦ ===== -->
+  <div id="trang-chu">
+    <header class="hero">
+      <div class="logo">🗺️ StudyMap</div>
+      <h1>Biết mình yếu ở đâu,<br>ôn đúng chỗ đó.</h1>
+      <p>Luyện đề Toán, KHTN, Tiếng Anh, có chấm điểm và giải thích từng câu.</p>
+      <div class="chips">
+        <span>⏱ Đồng hồ đếm ngược</span>
+        <span>✅ Chấm điểm tức thì</span>
+        <span>💡 Giải thích từng câu</span>
+      </div>
+    </header>
+
+    <main class="container">
+      <h2>Chọn môn học</h2>
+      <label class="chon-khoi" for="khoi-hoc">
+        Chọn khối lớp
+        <select id="khoi-hoc">
+          <option value="6">Lớp 6</option>
+          <option value="7">Lớp 7</option>
+          <option value="8">Lớp 8</option>
+          <option value="9">Lớp 9</option>
+        </select>
+      </label>
+      <label class="chon-khoi" for="dang-de">
+        Dạng đề
+        <select id="dang-de">
+          <option value="15p">Đề 15 phút</option>
+          <option value="giuaki">Đề giữa kỳ</option>
+          <option value="cuoiki">Đề cuối kỳ</option>
+          <option value="hsg">Đề học sinh giỏi</option>
+        </select>
+      </label>
+      <section class="lo-trinh-ca-nhan" aria-labelledby="lo-trinh-tieu-de">
+        <div class="lo-trinh-dau">
+          <div>
+            <h3 id="lo-trinh-tieu-de">🧭 Lộ trình của mình</h3>
+            <p id="trang-thai-tai-khoan" aria-live="polite">Đăng nhập Google để lưu tiến độ riêng và đồng bộ giữa các thiết bị.</p>
+          </div>
+          <div class="tai-khoan-actions">
+            <button class="nut-chinh" id="nut-dang-nhap-google" type="button">Đăng nhập bằng Google</button>
+            <button class="nut-phu an" id="nut-dang-xuat-google" type="button">Đăng xuất</button>
+          </div>
+        </div>
+        <div id="noi-dung-lo-trinh"></div>
+      </section>
+      <p class="ghi-chu-ngan-hang" id="ghi-chu-ngan-hang">
+        Đề được trộn ngẫu nhiên, ưu tiên câu vận dụng và thử thách; chọn HSG để luyện tự luận nâng cao. 💪
+      </p>
+      <div class="cards">
+        <button class="card toan" onclick="chonMon('toan')">
+          <span class="icon">📐</span>
+          <span class="ten">Môn Toán</span>
+          <span class="mota">Đại số, hình học, số học</span>
+          <span class="bat-dau">Bắt đầu →</span>
+        </button>
+
+        <button class="card khtn" onclick="moChonKHTN()">
+          <span class="icon">🔬</span>
+          <span class="ten">Môn KHTN</span>
+          <span class="mota">Chọn phân môn Lý, Hóa hoặc Sinh</span>
+          <span class="bat-dau">Chọn phân môn →</span>
+        </button>
+
+        <button class="card anh" onclick="moChonTiengAnh()">
+          <span class="icon">🔤</span>
+          <span class="ten">Tiếng Anh</span>
+          <span class="mota">Ngữ pháp, từ vựng</span>
+          <span class="bat-dau">Bắt đầu →</span>
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <section id="trang-tieng-anh" class="an trang-phu">
+    <div class="bai-thi">
+      <div class="bai-thi-dau">
+        <div>
+          <p class="nhan-trang">STUDYMAP · TIẾNG ANH</p>
+          <h2>Hôm nay mình luyện kỹ năng nào?</h2>
+        </div>
+        <button class="nut-phu" type="button" onclick="veTrangChu()">← Trang chủ</button>
+      </div>
+      <p class="ghi-chu-ngan-hang">Tách riêng từng kỹ năng để bạn chọn đúng mục tiêu ôn luyện.</p>
+      <div class="cards ky-nang-cards">
+        <button class="card nghe" onclick="chonMon('anh', 'nghe')">
+          <span class="icon">🎧</span>
+          <span class="ten">Luyện nghe</span>
+          <span class="mota">Nghe đoạn audio, trả lời câu hỏi</span>
+          <span class="bat-dau">Bắt đầu nghe →</span>
+        </button>
+        <button class="card noi" onclick="chonMon('anh', 'noi')">
+          <span class="icon">🎙️</span>
+          <span class="ten">Luyện nói</span>
+          <span class="mota">Nói theo câu mẫu bằng micro</span>
+          <span class="bat-dau">Bắt đầu nói →</span>
+        </button>
+        <button class="card tu-vung" onclick="chonMon('anh', 'doc')">
+          <span class="icon">📚</span>
+          <span class="ten">Từ vựng & ngữ pháp</span>
+          <span class="mota">Làm bài trắc nghiệm riêng, không lẫn nghe/nói</span>
+          <span class="bat-dau">Luyện bài →</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="trang-khtn" class="an trang-phu">
+    <div class="bai-thi">
+      <div class="bai-thi-dau">
+        <div>
+          <p class="nhan-trang">STUDYMAP · KHOA HỌC TỰ NHIÊN</p>
+          <h2>Chọn phân môn muốn luyện</h2>
+        </div>
+        <button class="nut-phu" type="button" onclick="veTrangChu()">← Trang chủ</button>
+      </div>
+      <div class="cards ky-nang-cards">
+        <button class="card vat-ly" onclick="chonMon('khtn', 'ly')">
+          <span class="icon">⚙️</span>
+          <span class="ten">Vật lý</span>
+          <span class="mota">Chuyển động, lực, âm thanh, điện</span>
+          <span class="bat-dau">Luyện Vật lý →</span>
+        </button>
+        <button class="card hoa-hoc" onclick="chonMon('khtn', 'hoa')">
+          <span class="icon">🧪</span>
+          <span class="ten">Hóa học</span>
+          <span class="mota">Chất, hỗn hợp, phản ứng hóa học</span>
+          <span class="bat-dau">Luyện Hóa học →</span>
+        </button>
+        <button class="card sinh-hoc" onclick="chonMon('khtn', 'sinh')">
+          <span class="icon">🌱</span>
+          <span class="ten">Sinh học</span>
+          <span class="mota">Tế bào, cơ thể sống, di truyền</span>
+          <span class="bat-dau">Luyện Sinh học →</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section id="trang-giao-vien" class="an trang-phu">
+    <div class="bai-thi bang-giao-vien">
+      <div class="bai-thi-dau">
+        <div>
+          <p class="nhan-trang">STUDYMAP · QUẢN LÝ LỚP</p>
+          <h2>Khu vực giáo viên</h2>
+        </div>
+        <button class="nut-phu" type="button" onclick="veTrangChu()">← Trang chủ</button>
+      </div>
+      <section>
+        <h3>Bài làm học sinh</h3>
+        <div id="danh-sach-bai-lam"></div>
+      </section>
+      <section class="quan-ly-de" hidden>
+        <h3>Ngân hàng câu hỏi</h3>
+        <div class="chon-ngan-hang">
+          <label for="gv-khoi">Khối
+            <select id="gv-khoi">
+              <option value="6">Lớp 6</option><option value="7">Lớp 7</option>
+              <option value="8">Lớp 8</option><option value="9">Lớp 9</option>
+            </select>
+          </label>
+          <label for="gv-mon">Môn
+            <select id="gv-mon">
+              <option value="toan">Toán</option><option value="khtn">KHTN</option>
+              <option value="anh">Tiếng Anh</option>
+            </select>
+          </label>
+        </div>
+        <div id="gv-danh-sach-cau-hoi"></div>
+        <h4 id="gv-tieu-de-form">Thêm câu hỏi</h4>
+        <input id="gv-question" placeholder="Nội dung câu hỏi" maxlength="600">
+        <label for="gv-topic">Chủ đề</label>
+        <input id="gv-topic" placeholder="Ví dụ: Phân số" maxlength="80">
+        <div class="gv-lua-chon">
+          <input id="gv-option-0" placeholder="Đáp án A" maxlength="250">
+          <input id="gv-option-1" placeholder="Đáp án B" maxlength="250">
+          <input id="gv-option-2" placeholder="Đáp án C" maxlength="250">
+          <input id="gv-option-3" placeholder="Đáp án D" maxlength="250">
+        </div>
+        <label for="gv-answer">Đáp án đúng</label>
+        <select id="gv-answer">
+          <option value="0">A</option><option value="1">B</option>
+          <option value="2">C</option><option value="3">D</option>
+        </select>
+        <label for="gv-skill">Kỹ năng Tiếng Anh (để lọc phần luyện tập)</label>
+        <select id="gv-skill">
+          <option value="">Không áp dụng / tự chọn theo bài</option>
+          <option value="doc">Từ vựng & ngữ pháp</option>
+          <option value="nghe">Luyện nghe</option>
+          <option value="noi">Luyện nói</option>
+        </select>
+        <label for="gv-explanation">Giải thích</label>
+        <textarea id="gv-explanation" rows="3" placeholder="Lời giải / giải thích"></textarea>
+        <label for="gv-listen">Lời thoại audio (nếu có)</label>
+        <textarea id="gv-listen" rows="2" placeholder="Để trống nếu câu này không có audio"></textarea>
+        <label for="gv-speaking">Câu mẫu luyện nói (nếu có)</label>
+        <textarea id="gv-speaking" rows="2" placeholder="Để trống nếu không phải câu luyện nói"></textarea>
+        <label class="gv-checkbox" for="gv-challenge">
+          <input id="gv-challenge" type="checkbox"> Câu nâng cao / học sinh giỏi
+        </label>
+        <div class="gv-actions">
+          <button class="nut-chinh" id="gv-luu" type="button">Lưu câu hỏi</button>
+          <button class="nut-phu an" id="gv-huy" type="button">Hủy sửa</button>
+          <button class="nut-phu" id="gv-xuat" type="button">Tải ngân hàng đề (JSON)</button>
+          <label class="nut-phu nut-tai-len" for="gv-nhap-file">Nhập ngân hàng đề (JSON)</label>
+          <input id="gv-nhap-file" class="an" type="file" accept="application/json,.json">
+        </div>
+        <p id="gv-thong-bao" aria-live="polite"></p>
+      </section>
+    </div>
+  </section>
+
+  <!-- ===== TRANG LÀM BÀI (ban đầu bị ẩn) ===== -->
+  <div id="trang-lam-bai" class="an">
+    <div class="bai-thi">
+      <div class="bai-thi-dau">
+        <h2 id="ten-mon"></h2>
+        <button class="nut-phu" onclick="veTrangChu()">← Về trang chủ</button>
+      </div>
+      <p class="dong-ho" id="dong-ho" aria-live="polite"></p>
+
+      <div class="cong-cu-cau-hoi">
+        <button class="nut-phu" id="nut-nghe" type="button">🔊 Nghe câu hỏi</button>
+        <button class="nut-phu an" id="nut-nghe-mau" type="button">🔊 1. Nghe câu mẫu</button>
+        <button class="nut-phu an" id="nut-noi" type="button">🎙 2. Đọc và chấm điểm</button>
+        <button class="nut-phu" id="nut-am-thanh" type="button">🔊 Tiếng báo đúng/sai: bật</button>
+      </div>
+      <p class="ghi-chu-audio" id="ghi-chu-audio"></p>
+      <div id="phan-hoi-noi" aria-live="polite"></div>
+      <div class="thanh-tien-do"><i id="tien-do"></i></div>
+
+      <p class="cau-so" id="cau-so"></p>
+      <p class="de-bai" id="de-bai"></p>
+
+      <div id="danh-sach-dap-an"></div>
+      <div id="phan-hoi-cau" aria-live="polite"></div>
+
+      <div class="dieu-huong">
+        <button class="nut-chinh" id="nut-sau" type="button" disabled>Câu tiếp theo →</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [["$", "$"], ["\\(", "\\)"]], displayMath: [["$$", "$$"], ["\\[", "\\]"]] },
+      startup: { typeset: false }
+    };
+  </script>
+  <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+    onload="window.MathJax.typesetPromise()"
+    onerror="window.hienThiCongThucFallback()"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
