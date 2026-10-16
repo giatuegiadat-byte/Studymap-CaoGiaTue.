@@ -3652,7 +3652,8 @@ document.getElementById("nut-am-thanh").addEventListener("click", (event) => {
 });
 document.addEventListener("click", (event) => {
   const button = event.target instanceof Element ? event.target.closest("button") : null;
-  if (!button || button.disabled || button.id === "nut-noi" || button.id === "nut-am-thanh") return;
+  if (!button || button.disabled || button.id === "nut-noi" || button.id === "nut-am-thanh"
+    || button.dataset.gtSound === "true") return;
   phatAmTuongTac();
 });
 document.getElementById("gv-khoi").addEventListener("change", () => {
@@ -3683,4 +3684,5 @@ window.chonMon = chonMon;
 window.veTrangChu = veTrangChu;
 window.moChonTiengAnh = moChonTiengAnh;
 window.moChonKHTN = moChonKHTN;
+window.phatAmTuongTac = phatAmTuongTac;
 })();

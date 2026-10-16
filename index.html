@@ -79,6 +79,42 @@
           <span class="bat-dau">Bắt đầu →</span>
         </button>
       </div>
+      <section class="giao-trinh" id="khu-vuc-giao-trinh" aria-labelledby="gt-tieu-de">
+        <div class="giao-trinh-dau">
+          <div>
+            <p class="gt-eyebrow">STUDYMAP · HỌC THEO CHƯƠNG TRÌNH</p>
+            <h2 id="gt-tieu-de">Chọn bài, học đúng thứ tự</h2>
+            <p class="giao-trinh-mo-ta">Mục lục được sắp theo thứ tự bài học. Mỗi bài có tóm tắt kiến thức và bài luyện từ nhận biết đến vận dụng cao.</p>
+          </div>
+        </div>
+        <div class="giao-trinh-bo-loc">
+          <label for="gt-mon">Môn học
+            <select id="gt-mon">
+              <option value="toan">Toán</option>
+              <option value="khtn">Khoa học tự nhiên</option>
+              <option value="tienganh">Tiếng Anh</option>
+            </select>
+          </label>
+          <label id="gt-nhan-phan-mon" class="an" for="gt-phan-mon">Phân môn KHTN
+            <select id="gt-phan-mon">
+              <option value="tat-ca">Tất cả phân môn</option>
+              <option value="Vật lý">Vật lý</option>
+              <option value="Hóa học">Hóa học</option>
+              <option value="Sinh học">Sinh học</option>
+            </select>
+          </label>
+        </div>
+        <div class="gt-layout">
+          <aside class="gt-muc-luc" aria-label="Mục lục bài học">
+            <div class="gt-muc-luc-dau">
+              <h3>Mục lục bài học</h3>
+              <span id="gt-so-bai"></span>
+            </div>
+            <nav id="gt-danh-sach-bai" aria-label="Chọn bài học"></nav>
+          </aside>
+          <div id="gt-noi-dung" class="gt-khu-vuc-noi-dung" aria-live="polite"></div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -281,6 +317,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <script src="firebase-config.js"></script>
+  <script src="data/catalog.js"></script>
+  <script src="data/toan6.js"></script>
+  <script src="data/khtn6.js"></script>
+  <script src="data/tienganh6.js"></script>
+  <script src="data/toan7.js"></script>
+  <script src="data/khtn7.js"></script>
+  <script src="data/tienganh7.js"></script>
+  <script src="data/toan8.js"></script>
+  <script src="data/khtn8.js"></script>
+  <script src="data/tienganh8.js"></script>
+  <script src="data/toan9.js"></script>
+  <script src="data/khtn9.js"></script>
+  <script src="data/tienganh9.js"></script>
+  <script src="data/curriculum-ui.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
