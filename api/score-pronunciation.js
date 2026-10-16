@@ -1,5 +1,6 @@
 const MAX_AUDIO_BYTES = 2.8 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set(["audio/wav"]);
+const GEMINI_MODEL = "gemini-3.8-flash";
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
@@ -110,7 +111,7 @@ module.exports = async function handler(req, res) {
   let geminiResponse;
   try {
     geminiResponse = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
       {
         method: "POST",
         signal: controller.signal,
