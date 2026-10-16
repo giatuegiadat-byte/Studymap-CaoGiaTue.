@@ -1,8 +1,8 @@
 window.studyMapFirebaseConfig = {
-  apiKey: "AIzaSyDTpPp2rMnUGTYvLZc2RiIVChH7m2TdFE",
-  authDomain: "studymap-85873.firebaseapp.com",
-  projectId: "studymap-85873",
-  storageBucket: "studymap-85873.firebasestorage.app",
-  messagingSenderId: "1071508622647",
-  appId: "1:1071508622647:web:335867c2973a5588939eb2"
+  apiKey: "AIzaSyAWWZcs1Kwj71JjoChckm6ten528DAmy44",
+  authDomain: "studymap-caogiatue-160413.firebaseapp.com",
+  projectId: "studymap-caogiatue-160413",
+  storageBucket: "studymap-caogiatue-160413.firebasestorage.app",
+  messagingSenderId: "1099178486475",
+  appId: "1:1099178486475:web:ad366dc43f15f3c1dfc94e"
 };
