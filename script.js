@@ -1419,7 +1419,21 @@ const phanHoiNoi = document.getElementById("phan-hoi-noi");
 const ghiChuAudio = document.getElementById("ghi-chu-audio");
 const nutNgheMau = document.getElementById("nut-nghe-mau");
 const nutNoi = document.getElementById("nut-noi");
-const nutDungNoi = document.getElementById("nut-dung-noi");
+
+function capNhatTienTrinhLuyenNoi(buocHienTai, hoanTat = false) {
+  const cacBuoc = [...document.querySelectorAll("#cac-buoc-luyen-noi [data-buoc-noi]")];
+  const chiSoHienTai = ["nghe", "noi", "ai"].indexOf(buocHienTai);
+  cacBuoc.forEach((buoc, index) => {
+    const daHoanTat = hoanTat || index < chiSoHienTai;
+    buoc.classList.toggle("da-hoan-tat", daHoanTat);
+    buoc.classList.toggle("dang-thuc-hien", !hoanTat && index === chiSoHienTai);
+    if (!hoanTat && index === chiSoHienTai) {
+      buoc.setAttribute("aria-current", "step");
+    } else {
+      buoc.removeAttribute("aria-current");
+    }
+  });
+}
 
 function hienTrang(trang) {
   [trangChu, trangTiengAnh, trangKHTN, trangLamBai].forEach((phan) => phan.classList.add("an"));
@@ -2205,6 +2219,12 @@ function khoiTaoBaiThi(tieuDe) {
   daNgheMauLuyenNoi = false;
   daTraLoiCau = false;
   daNopBai = false;
+  trangLamBai.classList.toggle("luyen-noi", monDangChon === "anh" && kyNangAnh === "noi");
+  document.getElementById("cac-buoc-luyen-noi").classList.toggle(
+    "an",
+    monDangChon !== "anh" || kyNangAnh !== "noi"
+  );
+  capNhatTienTrinhLuyenNoi("nghe");
   document.getElementById("ten-mon").textContent = tieuDe;
   hienTrang(trangLamBai);
   document.getElementById("nut-sau").classList.remove("an");
@@ -2213,7 +2233,8 @@ function khoiTaoBaiThi(tieuDe) {
     monDangChon === "toan" || (monDangChon === "anh" && kyNangAnh !== "nghe")
   );
   document.getElementById("nut-noi").classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
-  nutDungNoi.classList.add("an");
+  nutNoi.textContent = "🎙 Ghi âm chấm AI";
+  nutNoi.setAttribute("aria-pressed", "false");
   document.getElementById("nut-noi").disabled = false;
 
   batDauDongHo();
@@ -2264,13 +2285,15 @@ function hienThiCauHoi() {
   );
   document.getElementById("nut-noi").classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
   nutNgheMau.classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
-  nutDungNoi.classList.add("an");
+  nutNoi.textContent = "🎙 Ghi âm chấm AI";
+  nutNoi.setAttribute("aria-pressed", "false");
   document.getElementById("nut-noi").disabled = monDangChon === "anh" && kyNangAnh === "noi"
     && !daNgheMauLuyenNoi;
+  capNhatTienTrinhLuyenNoi("nghe");
   ghiChuAudio.textContent = kyNangAnh === "nghe"
     ? "Nghe đoạn thoại rồi chọn đáp án. Có thể nghe lại trước khi trả lời."
     : kyNangAnh === "noi"
-      ? "Nghe câu mẫu rồi bấm ghi âm để Gemini AI chấm phát âm và gợi ý luyện tập."
+      ? "Bắt đầu bằng cách nghe câu mẫu. Sau đó đọc lại để nhận góp ý phát âm từ Gemini AI."
       : monDangChon === "khtn"
       ? "Bấm “Nghe câu hỏi” để nghe nội dung bằng giọng đọc tiếng Việt."
       : "";
@@ -2278,7 +2301,13 @@ function hienThiCauHoi() {
   if (kyNangAnh === "noi") {
     const prompt = document.createElement("p");
     prompt.className = "cau-mau-noi";
-    prompt.textContent = `Câu mẫu: “${cauHoi.speaking}”`;
+    const nhanCauMau = document.createElement("span");
+    nhanCauMau.className = "nhan-cau-mau";
+    nhanCauMau.textContent = "Câu mẫu · Hãy đọc thành tiếng";
+    const noiDungCauMau = document.createElement("span");
+    noiDungCauMau.className = "noi-dung-cau-mau";
+    noiDungCauMau.textContent = `“${cauHoi.speaking}”`;
+    prompt.append(nhanCauMau, noiDungCauMau);
     danhSachDapAn.append(prompt);
   } else if (cauHoi.loaiCauHoi === "tu-luan-nhieu-y") {
     const huongDan = document.createElement("p");
@@ -2469,6 +2498,7 @@ function phatMauLuyenNoi() {
     ghiChuAudio.textContent = "Trình duyệt này chưa hỗ trợ phát câu mẫu thành tiếng.";
     daNgheMauLuyenNoi = true;
     document.getElementById("nut-noi").disabled = false;
+    capNhatTienTrinhLuyenNoi("noi");
     return;
   }
   if (!cauHoi.speaking) {
@@ -2490,6 +2520,7 @@ function phatMauLuyenNoi() {
     ghiChuAudio.textContent = "Đến lượt bạn: bấm micro và đọc lại câu mẫu.";
     nutNgheMau.disabled = false;
     document.getElementById("nut-noi").disabled = false;
+    capNhatTienTrinhLuyenNoi("noi");
   };
   mauDoc.onerror = () => {
     ghiChuAudio.textContent = "Không phát được câu mẫu. Hãy kiểm tra âm lượng hoặc giọng đọc của trình duyệt.";
@@ -2703,11 +2734,13 @@ async function chamDiemPhatAmGemini(blob, cauMau, chiSoCau, maPhien) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const errorMessage = payload.error || (response.status === 404
-      ? "Chưa tìm thấy dịch vụ chấm phát âm. Hãy chạy ứng dụng bằng Vercel hoặc triển khai lên Vercel."
-      : response.status === 429
-        ? "Bạn đã gửi quá nhiều yêu cầu. Hãy đợi một chút rồi thử lại."
-        : `Không chấm được phát âm (HTTP ${response.status}).`);
+    const errorMessage = response.status === 405
+      ? "Máy chủ hiện tại không hỗ trợ API chấm phát âm (HTTP 405). Hãy triển khai ứng dụng trên Vercel; Live Server và GitHub Pages không chạy được API này."
+      : response.status === 404
+        ? "Chưa tìm thấy dịch vụ chấm phát âm. Hãy chạy ứng dụng bằng Vercel hoặc triển khai lên Vercel."
+        : response.status === 429
+          ? "Bạn đã gửi quá nhiều yêu cầu. Hãy đợi một chút rồi thử lại."
+          : payload.error || `Không chấm được phát âm (HTTP ${response.status}).`;
     throw new Error(errorMessage);
   }
 
@@ -2727,6 +2760,7 @@ async function chamDiemPhatAmGemini(blob, cauMau, chiSoCau, maPhien) {
   }
 
   if (maPhien !== phienLuyenNoi || chiSoCau !== cauHoiHienTai || kyNangAnh !== "noi") return;
+  capNhatTienTrinhLuyenNoi("ai", true);
   hienKetQuaChamGemini(result, boCauHoiHienTai[chiSoCau].speaking);
   loiDocTungCau[chiSoCau] = result.transcript;
   const tuCanLuyen = result.wordIssues.map((item) =>
@@ -2790,42 +2824,58 @@ function batDauGhiAmLuyenNoi() {
       luongGhiAmLuyenNoi = null;
       boGhiAmLuyenNoi = null;
       cacPhanGhiAmLuyenNoi = [];
-      nutDungNoi.classList.add("an");
-      nutNoi.disabled = false;
+      nutNoi.textContent = "🎙 Ghi âm chấm AI";
+      nutNoi.setAttribute("aria-pressed", "false");
       nutNgheMau.disabled = false;
 
-      if (biHuy) return;
+      if (biHuy) {
+        nutNoi.disabled = false;
+        capNhatTienTrinhLuyenNoi("noi");
+        return;
+      }
       if (!blob.size) {
+        nutNoi.disabled = false;
+        capNhatTienTrinhLuyenNoi("noi");
         ghiChuAudio.textContent = "Không thu được âm thanh. Hãy kiểm tra micro rồi ghi âm lại.";
         return;
       }
       if (blob.size > 2.8 * 1024 * 1024) {
+        nutNoi.disabled = false;
+        capNhatTienTrinhLuyenNoi("noi");
         ghiChuAudio.textContent = "Bản ghi vượt quá giới hạn gửi an toàn. Hãy đọc câu ngắn hơn rồi thử lại.";
         return;
       }
 
+      capNhatTienTrinhLuyenNoi("ai");
       ghiChuAudio.textContent = "Đang gửi âm thanh tới Gemini để chấm phát âm...";
       nutNoi.disabled = true;
+      nutNoi.textContent = "⏳ Đang chấm phát âm...";
       nutNgheMau.disabled = true;
       try {
         await chamDiemPhatAmGemini(blob, cauHoi.speaking, chiSoCau, maPhien);
       } catch (error) {
         if (maPhien !== phienLuyenNoi || chiSoCau !== cauHoiHienTai || kyNangAnh !== "noi") return;
         console.error("Không chấm được phát âm bằng Gemini:", error);
+        capNhatTienTrinhLuyenNoi("noi");
         ghiChuAudio.textContent = error instanceof Error
           ? error.message
           : `Không chấm được phát âm: ${String(error)}`;
       } finally {
-        nutNoi.disabled = !daNgheMauLuyenNoi;
+        nutNoi.disabled = !daNgheMauLuyenNoi || daTraLoiCau;
+        nutNoi.textContent = daTraLoiCau
+          ? "✅ Đã chấm xong"
+          : "🎙 Ghi âm chấm AI";
+        nutNoi.setAttribute("aria-pressed", "false");
         nutNgheMau.disabled = false;
       }
     };
 
     try {
       recorder.start();
-      nutNoi.disabled = true;
+      nutNoi.disabled = false;
+      nutNoi.textContent = "⏹ Dừng ghi âm";
+      nutNoi.setAttribute("aria-pressed", "true");
       nutNgheMau.disabled = true;
-      nutDungNoi.classList.remove("an");
       document.getElementById("nut-sau").disabled = true;
       ghiChuAudio.textContent = "Đang ghi âm. Đọc câu mẫu rõ ràng, sau đó bấm “Dừng ghi âm”.";
       phanHoiNoi.replaceChildren(taoThongBao(
@@ -2842,6 +2892,8 @@ function batDauGhiAmLuyenNoi() {
       luongGhiAmLuyenNoi = null;
       boGhiAmLuyenNoi = null;
       nutNoi.disabled = false;
+      nutNoi.textContent = "🎙 Ghi âm chấm AI";
+      nutNoi.setAttribute("aria-pressed", "false");
       nutNgheMau.disabled = false;
       ghiChuAudio.textContent = "Không thể bắt đầu ghi âm. Hãy kiểm tra quyền micro và thử lại.";
     }
@@ -2858,8 +2910,17 @@ function dungGhiAmLuyenNoi() {
   if (boGhiAmLuyenNoi?.state === "recording") {
     clearTimeout(boDemGhiAmLuyenNoi);
     ghiChuAudio.textContent = "Đang dừng ghi âm và chuẩn bị chấm...";
-    nutDungNoi.disabled = true;
-    boGhiAmLuyenNoi.stop();
+    capNhatTienTrinhLuyenNoi("ai");
+    nutNoi.disabled = true;
+    nutNoi.textContent = "⏳ Đang xử lý bản ghi...";
+    try {
+      boGhiAmLuyenNoi.stop();
+    } catch (error) {
+      console.error("Không thể dừng ghi âm:", error);
+      nutNoi.disabled = false;
+      nutNoi.textContent = "⏹ Dừng ghi âm";
+      ghiChuAudio.textContent = "Không dừng được bản ghi. Hãy thử bấm dừng lại.";
+    }
   }
 }
 
@@ -2873,7 +2934,14 @@ function huyGhiAmLuyenNoi() {
   luongGhiAmLuyenNoi?.getTracks().forEach((track) => track.stop());
   luongGhiAmLuyenNoi = null;
   boGhiAmLuyenNoi = null;
-  nutDungNoi.classList.add("an");
+}
+
+function xuLyNutGhiAmLuyenNoi() {
+  if (boGhiAmLuyenNoi?.state === "recording") {
+    dungGhiAmLuyenNoi();
+    return;
+  }
+  batDauGhiAmLuyenNoi();
 }
 
 function chamDoKhopCauDoc(cauMau, loiDoc) {
@@ -3159,7 +3227,8 @@ function nopBai(hetGio) {
   document.getElementById("nut-sau").classList.add("an");
   document.getElementById("nut-nghe").classList.add("an");
   nutNoi.classList.add("an");
-  nutDungNoi.classList.add("an");
+  nutNoi.textContent = "🎙 Ghi âm chấm AI";
+  nutNoi.setAttribute("aria-pressed", "false");
   document.getElementById("dong-ho").textContent = hetGio
     ? "⏱ Đã hết giờ"
     : `${dangDe[dangDeDangChon].ten} · Đã hoàn thành`;
@@ -3179,7 +3248,8 @@ function veTrangChu() {
   document.getElementById("nut-sau").classList.remove("an");
   document.getElementById("nut-nghe").classList.remove("an");
   nutNoi.classList.add("an");
-  nutDungNoi.classList.add("an");
+  nutNoi.textContent = "🎙 Ghi âm chấm AI";
+  nutNoi.setAttribute("aria-pressed", "false");
   document.getElementById("nut-sau").textContent = "Câu tiếp theo →";
   monDangChon = "";
 }
@@ -3497,8 +3567,7 @@ document.querySelectorAll(".chon-khoi select").forEach((select) => {
 document.getElementById("nut-sau").addEventListener("click", () => doiCau(1));
 document.getElementById("nut-nghe").addEventListener("click", phatAudioCauHoi);
 nutNgheMau.addEventListener("click", phatMauLuyenNoi);
-nutNoi.addEventListener("click", batDauGhiAmLuyenNoi);
-nutDungNoi.addEventListener("click", dungGhiAmLuyenNoi);
+nutNoi.addEventListener("click", xuLyNutGhiAmLuyenNoi);
 document.getElementById("nut-am-thanh").addEventListener("click", (event) => {
   tiengAnMuted = !tiengAnMuted;
   event.currentTarget.textContent = `🔊 Tiếng báo đúng/sai: ${tiengAnMuted ? "tắt" : "bật"}`;

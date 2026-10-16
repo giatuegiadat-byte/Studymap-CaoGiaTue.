@@ -229,11 +229,24 @@
       </div>
       <p class="dong-ho" id="dong-ho" aria-live="polite"></p>
 
+      <ol class="cac-buoc-luyen-noi an" id="cac-buoc-luyen-noi" aria-label="Tiến trình luyện phát âm">
+        <li data-buoc-noi="nghe">
+          <span class="so-buoc-noi">1</span>
+          <span><strong>Nghe mẫu</strong><small>Nghe cách đọc chuẩn</small></span>
+        </li>
+        <li data-buoc-noi="noi">
+          <span class="so-buoc-noi">2</span>
+          <span><strong>Đến lượt bạn</strong><small>Đọc câu vào micro</small></span>
+        </li>
+        <li data-buoc-noi="ai">
+          <span class="so-buoc-noi">3</span>
+          <span><strong>Nhận góp ý</strong><small>Xem điểm từ Gemini AI</small></span>
+        </li>
+      </ol>
       <div class="cong-cu-cau-hoi">
         <button class="nut-phu" id="nut-nghe" type="button">🔊 Nghe câu hỏi</button>
         <button class="nut-phu an" id="nut-nghe-mau" type="button">🔊 1. Nghe câu mẫu</button>
         <button class="nut-phu an" id="nut-noi" type="button">🎙 Ghi âm chấm AI</button>
-        <button class="nut-phu an" id="nut-dung-noi" type="button">⏹ Dừng ghi âm</button>
         <button class="nut-phu" id="nut-am-thanh" type="button">🔊 Tiếng báo đúng/sai: bật</button>
       </div>
       <p class="ghi-chu-audio" id="ghi-chu-audio"></p>
