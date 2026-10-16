@@ -232,9 +232,21 @@
       <div class="cong-cu-cau-hoi">
         <button class="nut-phu" id="nut-nghe" type="button">🔊 Nghe câu hỏi</button>
         <button class="nut-phu an" id="nut-nghe-mau" type="button">🔊 1. Nghe câu mẫu</button>
-        <button class="nut-phu an" id="nut-noi" type="button">🎙 2. Đọc và chấm điểm</button>
+        <button class="nut-phu an" id="nut-noi" type="button">🎙 Ghi âm chấm AI</button>
+        <button class="nut-phu an" id="nut-dung-noi" type="button">⏹ Dừng ghi âm</button>
         <button class="nut-phu" id="nut-am-thanh" type="button">🔊 Tiếng báo đúng/sai: bật</button>
       </div>
+      <section class="cau-hinh-ai-noi an" id="cau-hinh-ai-noi" aria-labelledby="tieu-de-ai-noi">
+        <h3 id="tieu-de-ai-noi">🤖 Chấm phát âm với Gemini AI</h3>
+        <label for="gemini-api-key">Gemini API key</label>
+        <input id="gemini-api-key" type="password" autocomplete="off" spellcheck="false"
+          placeholder="Dán API key từ Google AI Studio">
+        <p class="ghi-chu-cham-doc">
+          Key chỉ được giữ trong bộ nhớ tab hiện tại, không lưu vào mã nguồn. Ghi âm sẽ được gửi tới Google Gemini để chấm.
+          Khi chạy website công khai, API key nhập ở trình duyệt vẫn có thể bị lộ; hãy giới hạn key và ngân sách.
+          <a href="https://aistudio.google.com/api-keys" target="_blank" rel="noopener noreferrer">Tạo Gemini API key</a>
+        </p>
+      </section>
       <p class="ghi-chu-audio" id="ghi-chu-audio"></p>
       <div id="phan-hoi-noi" aria-live="polite"></div>
       <div class="thanh-tien-do"><i id="tien-do"></i></div>
