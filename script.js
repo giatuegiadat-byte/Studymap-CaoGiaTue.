@@ -1420,8 +1420,6 @@ const ghiChuAudio = document.getElementById("ghi-chu-audio");
 const nutNgheMau = document.getElementById("nut-nghe-mau");
 const nutNoi = document.getElementById("nut-noi");
 const nutDungNoi = document.getElementById("nut-dung-noi");
-const cauHinhAiNoi = document.getElementById("cau-hinh-ai-noi");
-const khoaGemini = document.getElementById("gemini-api-key");
 
 function hienTrang(trang) {
   [trangChu, trangTiengAnh, trangKHTN, trangLamBai].forEach((phan) => phan.classList.add("an"));
@@ -2216,7 +2214,6 @@ function khoiTaoBaiThi(tieuDe) {
   );
   document.getElementById("nut-noi").classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
   nutDungNoi.classList.add("an");
-  cauHinhAiNoi.classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
   document.getElementById("nut-noi").disabled = false;
 
   batDauDongHo();
@@ -2268,13 +2265,12 @@ function hienThiCauHoi() {
   document.getElementById("nut-noi").classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
   nutNgheMau.classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
   nutDungNoi.classList.add("an");
-  cauHinhAiNoi.classList.toggle("an", monDangChon !== "anh" || kyNangAnh !== "noi");
   document.getElementById("nut-noi").disabled = monDangChon === "anh" && kyNangAnh === "noi"
     && !daNgheMauLuyenNoi;
   ghiChuAudio.textContent = kyNangAnh === "nghe"
     ? "Nghe đoạn thoại rồi chọn đáp án. Có thể nghe lại trước khi trả lời."
     : kyNangAnh === "noi"
-      ? "Bước 1: nghe câu mẫu. Bước 2: nhập Gemini API key, ghi âm câu đọc và nhận góp ý phát âm từ AI."
+      ? "Nghe câu mẫu rồi bấm ghi âm để Gemini AI chấm phát âm và gợi ý luyện tập."
       : monDangChon === "khtn"
       ? "Bấm “Nghe câu hỏi” để nghe nội dung bằng giọng đọc tiếng Việt."
       : "";
@@ -2542,7 +2538,7 @@ function hienDiemLuyenNoi(diem, alignment) {
   phanHoiNoi.replaceChildren(ketQua);
 }
 
-function hienKetQuaChamGemini(result) {
+function hienKetQuaChamGemini(result, cauMau) {
   const ketQua = document.createElement("section");
   ketQua.className = "ket-qua-phat-am";
 
@@ -2593,10 +2589,7 @@ function hienKetQuaChamGemini(result) {
     ketQua.append(tieuDeTu, danhSachTu);
   }
 
-  const ketQuaTu = chamDoKhopCauDoc(
-    boCauHoiHienTai[cauHoiHienTai].speaking,
-    result.transcript
-  );
+  const ketQuaTu = chamDoKhopCauDoc(cauMau, result.transcript);
   const chuGiai = document.createElement("p");
   chuGiai.className = "chu-giai-so-sanh";
   chuGiai.textContent = "Đối chiếu câu mẫu với phần AI nhận dạng: xanh là khớp, đỏ là khác hoặc thiếu.";
@@ -2638,102 +2631,89 @@ function docBase64(blob) {
   });
 }
 
-async function chamDiemPhatAmGemini(blob, cauMau, chiSoCau, maPhien) {
-  const apiKey = khoaGemini.value.trim();
-  if (!apiKey) {
-    throw new Error("Hãy nhập Gemini API key trước khi gửi bản ghi âm.");
+async function chuyenSangWav16k(blob) {
+  const AudioContextConstructor = window.AudioContext || window.webkitAudioContext;
+  if (!AudioContextConstructor) {
+    throw new Error("Trình duyệt không hỗ trợ xử lý âm thanh. Hãy dùng Chrome hoặc Edge mới nhất.");
   }
 
-  const mimeType = blob.type.split(";")[0].toLowerCase();
-  if (!["audio/webm", "audio/mp4", "audio/ogg", "audio/wav"].includes(mimeType)) {
-    throw new Error(`Định dạng ghi âm ${mimeType || "không xác định"} chưa được hỗ trợ. Hãy thử Chrome hoặc Edge mới nhất.`);
-  }
-
-  const base64Audio = await docBase64(blob);
-  const prompt = [
-    "Hãy đánh giá bản ghi âm của học sinh đang đọc câu mẫu tiếng Anh được cung cấp.",
-    `Câu mẫu: "${cauMau}"`,
-    "Chấm điểm phát âm tổng quát từ 0 đến 100, đồng thời cho điểm pronunciation, clarity, rhythm.",
-    "Đánh giá dựa trên âm thanh thực tế và mức độ đọc đúng câu mẫu; không suy đoán lỗi nếu âm thanh không đủ rõ.",
-    "Không trừ điểm chỉ vì giọng vùng miền hoặc khác biệt giọng Anh-Mỹ/Anh-Anh.",
-    "Viết feedback, practiceTip và tip bằng tiếng Việt; wordIssues chỉ liệt kê tối đa 8 từ thực sự cần luyện.",
-    "Nếu không nghe rõ, hãy phản ánh trung thực trong transcript và feedback, không tự bịa lời nói."
-  ].join("\n");
-  const responseSchema = {
-    type: "OBJECT",
-    properties: {
-      score: { type: "INTEGER" },
-      pronunciation: { type: "INTEGER" },
-      clarity: { type: "INTEGER" },
-      rhythm: { type: "INTEGER" },
-      transcript: { type: "STRING" },
-      wordIssues: {
-        type: "ARRAY",
-        items: {
-          type: "OBJECT",
-          properties: {
-            word: { type: "STRING" },
-            heardAs: { type: "STRING" },
-            tip: { type: "STRING" }
-          },
-          required: ["word", "heardAs", "tip"]
-        }
-      },
-      feedback: { type: "STRING" },
-      practiceTip: { type: "STRING" }
-    },
-    required: ["score", "pronunciation", "clarity", "rhythm", "transcript", "wordIssues", "feedback", "practiceTip"]
-  };
-  const response = await fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": apiKey
-      },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{
-            text: "Bạn là giáo viên tiếng Anh thân thiện, công tâm, chuyên hướng dẫn phát âm cho học sinh. Chấm theo âm thanh, không đánh đồng nhận dạng từ với chất lượng phát âm. Trả về nội dung theo đúng JSON schema được yêu cầu."
-          }]
-        },
-        contents: [{
-          role: "user",
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType, data: base64Audio } }
-          ]
-        }],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
-          responseSchema
-        }
-      })
-    }
-  );
-
-  const payload = await response.json();
-  if (!response.ok) {
-    const detail = payload.error?.message || `HTTP ${response.status}`;
-    throw new Error(`Gemini API từ chối yêu cầu: ${detail}`);
-  }
-
-  const resultText = payload.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text || "")
-    .join("")
-    .trim();
-  if (!resultText) {
-    throw new Error("Gemini không trả về kết quả chấm. Hãy thử ghi âm lại câu ngắn và rõ hơn.");
-  }
-
-  let result;
+  const audioContext = new AudioContextConstructor();
   try {
-    result = JSON.parse(resultText);
-  } catch (error) {
-    console.error("Gemini trả về kết quả không đúng JSON:", error);
-    throw new Error("Gemini trả về kết quả không đúng định dạng. Hãy thử lại.");
+    const audio = await audioContext.decodeAudioData(await blob.arrayBuffer());
+    const sampleRate = 16000;
+    const sampleCount = Math.ceil(audio.length * sampleRate / audio.sampleRate);
+    const dataSize = sampleCount * 2;
+    const wavBuffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(wavBuffer);
+    const writeText = (offset, text) => {
+      for (let index = 0; index < text.length; index += 1) {
+        view.setUint8(offset + index, text.charCodeAt(index));
+      }
+    };
+
+    writeText(0, "RIFF");
+    view.setUint32(4, 36 + dataSize, true);
+    writeText(8, "WAVE");
+    writeText(12, "fmt ");
+    view.setUint32(16, 16, true);
+    view.setUint16(20, 1, true);
+    view.setUint16(22, 1, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, sampleRate * 2, true);
+    view.setUint16(32, 2, true);
+    view.setUint16(34, 16, true);
+    writeText(36, "data");
+    view.setUint32(40, dataSize, true);
+
+    const channels = Array.from({ length: audio.numberOfChannels }, (_, index) =>
+      audio.getChannelData(index)
+    );
+    for (let index = 0; index < sampleCount; index += 1) {
+      const sourcePosition = index * audio.sampleRate / sampleRate;
+      const sourceIndex = Math.floor(sourcePosition);
+      const fraction = sourcePosition - sourceIndex;
+      let sample = 0;
+      channels.forEach((channel) => {
+        const current = channel[Math.min(sourceIndex, channel.length - 1)] || 0;
+        const next = channel[Math.min(sourceIndex + 1, channel.length - 1)] || 0;
+        sample += current + (next - current) * fraction;
+      });
+      sample /= channels.length || 1;
+      const clipped = Math.max(-1, Math.min(1, sample));
+      view.setInt16(44 + index * 2, clipped < 0 ? clipped * 0x8000 : clipped * 0x7fff, true);
+    }
+
+    return new Blob([wavBuffer], { type: "audio/wav" });
+  } finally {
+    await audioContext.close();
+  }
+}
+
+async function chamDiemPhatAmGemini(blob, cauMau, chiSoCau, maPhien) {
+  const audioWav = await chuyenSangWav16k(blob);
+  const base64Audio = await docBase64(audioWav);
+  const response = await fetch("/api/score-pronunciation", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      referenceText: cauMau,
+      audio: base64Audio,
+      mimeType: audioWav.type
+    })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const errorMessage = payload.error || (response.status === 404
+      ? "Chưa tìm thấy dịch vụ chấm phát âm. Hãy chạy ứng dụng bằng Vercel hoặc triển khai lên Vercel."
+      : response.status === 429
+        ? "Bạn đã gửi quá nhiều yêu cầu. Hãy đợi một chút rồi thử lại."
+        : `Không chấm được phát âm (HTTP ${response.status}).`);
+    throw new Error(errorMessage);
+  }
+
+  const result = payload?.result;
+  if (!result || typeof result !== "object") {
+    throw new Error("Máy chủ chấm phát âm trả về dữ liệu không hợp lệ. Hãy thử lại.");
   }
 
   const laDiemHopLe = (score) => Number.isInteger(score) && score >= 0 && score <= 100;
@@ -2747,7 +2727,7 @@ async function chamDiemPhatAmGemini(blob, cauMau, chiSoCau, maPhien) {
   }
 
   if (maPhien !== phienLuyenNoi || chiSoCau !== cauHoiHienTai || kyNangAnh !== "noi") return;
-  hienKetQuaChamGemini(result);
+  hienKetQuaChamGemini(result, boCauHoiHienTai[chiSoCau].speaking);
   loiDocTungCau[chiSoCau] = result.transcript;
   const tuCanLuyen = result.wordIssues.map((item) =>
     `${item.word}${item.heardAs ? ` → ${item.heardAs}` : ""}`
@@ -2759,11 +2739,6 @@ async function chamDiemPhatAmGemini(blob, cauMau, chiSoCau, maPhien) {
 }
 
 function batDauGhiAmLuyenNoi() {
-  if (!khoaGemini.value.trim()) {
-    ghiChuAudio.textContent = "Nhập Gemini API key ở khung chấm AI trước khi ghi âm.";
-    khoaGemini.focus();
-    return;
-  }
   if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
     ghiChuAudio.textContent = "Trình duyệt chưa hỗ trợ ghi âm. Hãy dùng Chrome hoặc Edge mới nhất trên HTTPS hoặc localhost.";
     return;
@@ -2824,8 +2799,8 @@ function batDauGhiAmLuyenNoi() {
         ghiChuAudio.textContent = "Không thu được âm thanh. Hãy kiểm tra micro rồi ghi âm lại.";
         return;
       }
-      if (blob.size > 10 * 1024 * 1024) {
-        ghiChuAudio.textContent = "Bản ghi vượt quá 10 MB. Hãy đọc câu ngắn hơn rồi thử lại.";
+      if (blob.size > 2.8 * 1024 * 1024) {
+        ghiChuAudio.textContent = "Bản ghi vượt quá giới hạn gửi an toàn. Hãy đọc câu ngắn hơn rồi thử lại.";
         return;
       }
 
@@ -3185,7 +3160,6 @@ function nopBai(hetGio) {
   document.getElementById("nut-nghe").classList.add("an");
   nutNoi.classList.add("an");
   nutDungNoi.classList.add("an");
-  cauHinhAiNoi.classList.add("an");
   document.getElementById("dong-ho").textContent = hetGio
     ? "⏱ Đã hết giờ"
     : `${dangDe[dangDeDangChon].ten} · Đã hoàn thành`;
@@ -3206,7 +3180,6 @@ function veTrangChu() {
   document.getElementById("nut-nghe").classList.remove("an");
   nutNoi.classList.add("an");
   nutDungNoi.classList.add("an");
-  cauHinhAiNoi.classList.add("an");
   document.getElementById("nut-sau").textContent = "Câu tiếp theo →";
   monDangChon = "";
 }

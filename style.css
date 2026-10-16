@@ -537,25 +537,6 @@ main {
   font-size: 0.9rem;
 }
 .ghi-chu-audio:empty { display: none; }
-.cau-hinh-ai-noi {
-  margin: 14px 0;
-  padding: 16px;
-  border: 1px solid #ddd6fe;
-  border-radius: 14px;
-  background: #faf8ff;
-}
-.cau-hinh-ai-noi h3 { margin: 0 0 10px; color: #4a1fe0; }
-.cau-hinh-ai-noi label { display: block; margin-bottom: 6px; font-weight: 700; }
-.cau-hinh-ai-noi input {
-  width: 100%;
-  padding: 11px 12px;
-  border: 1px solid #c4b5fd;
-  border-radius: 9px;
-  font: inherit;
-}
-.cau-hinh-ai-noi input:focus { outline: 2px solid #9b8af5; }
-.cau-hinh-ai-noi p { margin: 9px 0 0; line-height: 1.5; }
-.cau-hinh-ai-noi a { color: #4a1fe0; font-weight: 650; }
 .dong-ho {
   margin: 20px 0 0;
   color: #4a1fe0;
