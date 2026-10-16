@@ -1493,7 +1493,11 @@ async function dangNhapGoogle() {
 }
 
 async function dangXuatGoogle() {
-  if (!firebaseAuth) return;
+  if (!firebaseAuth) {
+    capNhatTrangThaiTaiKhoan("Chưa kết nối Firebase nên không thể đăng xuất.", true);
+    return;
+  }
+
   try {
     await firebaseAuth.signOut();
   } catch (error) {
@@ -1517,7 +1521,7 @@ async function capNhatHoSoFirebase(user, khoi) {
 
 async function napTienDoFirebase(user) {
   taiKhoanDangNhap = user;
-  tenHocSinh = user.displayName || "Học sinh";
+  tenHocSinh = user?.displayName || "Học sinh";
   const loginButton = document.getElementById("nut-dang-nhap-google");
   const logoutButton = document.getElementById("nut-dang-xuat-google");
   const roadmap = document.getElementById("noi-dung-lo-trinh");
@@ -1553,7 +1557,7 @@ async function napTienDoFirebase(user) {
   }
 }
 
-function khoiTaoFirebase() {
+async function khoiTaoFirebase() {
   const config = window.studyMapFirebaseConfig;
   if (!laFirebaseConfigHopLe(config) || !window.firebase?.initializeApp
     || !window.firebase.auth || !window.firebase.firestore) {
@@ -1566,12 +1570,16 @@ function khoiTaoFirebase() {
     const app = window.firebase.apps.length ? window.firebase.app() : window.firebase.initializeApp(config);
     firebaseAuth = app.auth();
     firebaseDb = app.firestore();
+    const loginButton = document.getElementById("nut-dang-nhap-google");
+    loginButton.disabled = true;
+    await firebaseAuth.setPersistence(window.firebase.auth.Auth.Persistence.LOCAL);
     firebaseAuth.onAuthStateChanged((user) => {
-      napTienDoFirebase(user);
+      void napTienDoFirebase(user);
     }, (error) => {
       console.error("Không xác định được phiên đăng nhập:", error);
       capNhatTrangThaiTaiKhoan(`Không kiểm tra được đăng nhập: ${error.message}`, true);
     });
+    loginButton.disabled = false;
   } catch (error) {
     console.error("Không khởi tạo được Firebase:", error);
     capNhatTrangThaiTaiKhoan(`Không khởi tạo được Firebase: ${error.message}`, true);

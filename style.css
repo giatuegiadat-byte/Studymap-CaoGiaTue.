@@ -280,6 +280,23 @@ main {
 .lo-trinh-dau h3 { margin: 0 0 5px; color: #33227d; }
 .lo-trinh-dau p { margin: 0; color: var(--chu-nhat); font-size: 0.9rem; }
 .tai-khoan-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.hero > .tai-khoan-actions {
+  position: absolute;
+  z-index: 2;
+  top: 16px;
+  right: 20px;
+  justify-content: flex-end;
+}
+.hero .tai-khoan-actions .nut-chinh {
+  background: white;
+  color: #4a1fe0;
+  box-shadow: 0 5px 14px rgba(31, 42, 92, 0.2);
+}
+.hero .tai-khoan-actions .nut-phu {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+}
 .lo-trinh-tom-tat {
   display: flex;
   flex-wrap: wrap;
