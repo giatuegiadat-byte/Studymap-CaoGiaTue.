@@ -1,6 +1,13 @@
 const MAX_AUDIO_BYTES = 2.8 * 1024 * 1024;
 const ALLOWED_MIME_TYPES = new Set(["audio/wav"]);
-const GEMINI_MODEL = "gemini-3.8-flash";
+const GEMINI_MODELS = [
+  "gemini-3.8-flash",
+  "gemini-3.7-flash",
+  "gemini-3.6-flash",
+  "gemini-3-flash-preview",
+  "gemini-3.5-flash"
+];
+const GEMINI_TIMEOUT_MS = 10000;
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
@@ -106,59 +113,89 @@ module.exports = async function handler(req, res) {
     "Nếu không nghe rõ, hãy phản ánh trung thực trong transcript và feedback, không tự bịa lời nói."
   ].join("\n");
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  let geminiResponse;
-  try {
-    geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
-      {
-        method: "POST",
-        signal: controller.signal,
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": process.env.GEMINI_API_KEY
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{
-              text: "Bạn là giáo viên tiếng Anh thân thiện, công tâm, chuyên hướng dẫn phát âm cho học sinh. Chấm theo âm thanh, không đánh đồng nhận dạng từ với chất lượng phát âm. Trả về nội dung theo đúng JSON schema được yêu cầu."
-            }]
+  const requestBody = JSON.stringify({
+    systemInstruction: {
+      parts: [{
+        text: "Bạn là giáo viên tiếng Anh thân thiện, công tâm, chuyên hướng dẫn phát âm cho học sinh. Chấm theo âm thanh, không đánh đồng nhận dạng từ với chất lượng phát âm. Trả về nội dung theo đúng JSON schema được yêu cầu."
+      }]
+    },
+    contents: [{
+      role: "user",
+      parts: [
+        { text: prompt },
+        { inlineData: { mimeType, data: audio } }
+      ]
+    }],
+    generationConfig: {
+      temperature: 0.2,
+      responseMimeType: "application/json",
+      responseSchema: RESPONSE_SCHEMA
+    }
+  });
+  let geminiResponse = null;
+  let payload = null;
+  let modelUsed = "";
+  let lastFailure = null;
+  for (const model of GEMINI_MODELS) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+    try {
+      geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          signal: controller.signal,
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": process.env.GEMINI_API_KEY
           },
-          contents: [{
-            role: "user",
-            parts: [
-              { text: prompt },
-              { inlineData: { mimeType, data: audio } }
-            ]
-          }],
-          generationConfig: {
-            temperature: 0.2,
-            responseMimeType: "application/json",
-            responseSchema: RESPONSE_SCHEMA
-          }
-        })
-      }
-    );
-  } catch (error) {
-    console.error("Gemini pronunciation request failed:", error.name);
-    return sendJson(res, 502, {
-      error: error.name === "AbortError"
-        ? "Gemini phản hồi quá lâu. Hãy thử lại."
-        : "Không kết nối được dịch vụ chấm phát âm. Hãy thử lại."
-    });
-  } finally {
-    clearTimeout(timeout);
+          body: requestBody
+        }
+      );
+      payload = await geminiResponse.json();
+    } catch (error) {
+      lastFailure = error;
+      console.warn("Gemini pronunciation model request failed; trying fallback:", model, error.name);
+      continue;
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (geminiResponse.ok) {
+      modelUsed = model;
+      break;
+    }
+
+    const status = geminiResponse.status;
+    const upstreamMessage = payload?.error?.message;
+    const isHighDemand = typeof upstreamMessage === "string"
+      && /high demand|overload|temporarily unavailable/i.test(upstreamMessage);
+    const isTransient = [404, 429, 500, 502, 503, 504].includes(status) || isHighDemand;
+    if (status === 401 || status === 403) {
+      console.error("Gemini rejected pronunciation API credentials:", status);
+      return sendJson(res, 502, {
+        error: "Gemini từ chối API key hoặc quyền truy cập model. Hãy kiểm tra lại GEMINI_API_KEY trong cấu hình máy chủ."
+      });
+    }
+    if (!isTransient) {
+      console.error("Gemini pronunciation API returned a non-retryable status:", status);
+      return sendJson(res, 502, {
+        error: "Gemini từ chối bản ghi. Hãy thử ghi âm lại; nếu lỗi tiếp diễn, kiểm tra cấu hình API."
+      });
+    }
+    lastFailure = { status };
+    console.warn("Gemini pronunciation model unavailable; trying fallback:", model, status);
   }
 
-  const payload = await geminiResponse.json().catch(() => null);
-  if (!geminiResponse.ok) {
-    console.error("Gemini pronunciation API returned status:", geminiResponse.status);
-    const detail = payload?.error?.message;
-    return sendJson(res, 502, {
-      error: typeof detail === "string"
-        ? `Gemini không thể chấm bản ghi: ${detail}`
-        : "Gemini không thể chấm bản ghi. Hãy thử lại."
+  if (!modelUsed) {
+    if (lastFailure?.status === 404) {
+      return sendJson(res, 503, {
+        error: "Các model Gemini dự phòng hiện không khả dụng cho API key này. Hãy kiểm tra quyền model trong Google AI Studio."
+      });
+    }
+    console.error("All Gemini pronunciation models failed.", lastFailure?.name || lastFailure?.status || "unknown");
+    return sendJson(res, 503, {
+      error: "Gemini đang quá tải hoặc tạm thời mất kết nối. Hệ thống đã thử các model dự phòng; vui lòng đợi một chút rồi ghi âm lại."
     });
   }
 

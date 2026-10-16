@@ -2827,6 +2827,7 @@ function batDauGhiAmLuyenNoi() {
       nutNoi.textContent = "🎙 Ghi âm chấm AI";
       nutNoi.setAttribute("aria-pressed", "false");
       nutNgheMau.disabled = false;
+      phanHoiNoi.replaceChildren();
 
       if (biHuy) {
         nutNoi.disabled = false;
@@ -2851,6 +2852,11 @@ function batDauGhiAmLuyenNoi() {
       nutNoi.disabled = true;
       nutNoi.textContent = "⏳ Đang chấm phát âm...";
       nutNgheMau.disabled = true;
+      phanHoiNoi.replaceChildren(taoThongBao(
+        "ket-qua-phat-am dang-cham-ai",
+        "Gemini đang phân tích bản ghi...",
+        "Hệ thống sẽ tự chuyển model nếu model chính quá tải. Bạn cứ chờ kết quả ở đây nhé."
+      ));
       try {
         await chamDiemPhatAmGemini(blob, cauHoi.speaking, chiSoCau, maPhien);
       } catch (error) {
@@ -2879,7 +2885,7 @@ function batDauGhiAmLuyenNoi() {
       document.getElementById("nut-sau").disabled = true;
       ghiChuAudio.textContent = "Đang ghi âm. Đọc câu mẫu rõ ràng, sau đó bấm “Dừng ghi âm”.";
       phanHoiNoi.replaceChildren(taoThongBao(
-        "phan-hoi-dung",
+        "phan-hoi-dang-ghi-am",
         "Đang ghi âm...",
         "Âm thanh sẽ chỉ được gửi tới Gemini khi bạn dừng ghi âm."
       ));

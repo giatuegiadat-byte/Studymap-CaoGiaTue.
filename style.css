@@ -1176,6 +1176,47 @@ body {
   border-radius: 20px;
 }
 
+.luyen-noi .dang-cham-ai {
+  position: relative;
+  min-height: 80px;
+  padding: 18px 18px 18px 60px;
+  border-color: #ddd6fe;
+  background: linear-gradient(120deg, #faf8ff, #f7f8ff);
+  text-align: left;
+}
+
+.luyen-noi .dang-cham-ai::before {
+  position: absolute;
+  top: 21px;
+  left: 20px;
+  width: 22px;
+  height: 22px;
+  border: 3px solid #ddd6fe;
+  border-top-color: #7c3aed;
+  border-radius: 50%;
+  animation: xoay-cham-ai 0.8s linear infinite;
+  content: "";
+}
+
+.luyen-noi .dang-cham-ai strong { color: #4c348c; }
+.luyen-noi .dang-cham-ai p { margin: 5px 0 0; color: var(--chu-nhat); }
+
+@keyframes xoay-cham-ai {
+  to { transform: rotate(360deg); }
+}
+
+.luyen-noi .phan-hoi-dang-ghi-am {
+  margin: 14px 0;
+  padding: 14px 16px;
+  border: 1px solid #ddd6fe;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f5f3ff, #f5f8ff);
+  color: #51427e;
+  line-height: 1.55;
+}
+
+.luyen-noi .phan-hoi-dang-ghi-am p { margin: 6px 0 0; }
+
 .luyen-noi .ket-qua-phat-am h3 {
   margin: 0 0 10px;
   font-size: clamp(1.3rem, 4vw, 1.8rem);
