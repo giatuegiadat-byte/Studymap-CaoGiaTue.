@@ -159,6 +159,10 @@ body {
 .anh  .bat-dau { color: #ea580c; }
 .anh  { border-color: #ffedd5; border-bottom-color: #fdba74; }
 
+.tin-hoc .icon { background: #fae8ff; }
+.tin-hoc .bat-dau { color: #a21caf; }
+.tin-hoc { border-color: #fae8ff; border-bottom-color: #f5d0fe; }
+
 footer {
   text-align: center;
   color: var(--chu-nhat);
